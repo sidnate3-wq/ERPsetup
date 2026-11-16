@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order to Cash: Where AI Improves the ERP</title>
+<style>
+:root{--bg:#070b14;--panel:#0e1628;--line:#22304d;--text:#e8edf7;--mute:#9aa6bf;--ok:#34d6a0;--bad:#ff6b6b;--acc:#4da3ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:dark}
+body{background:radial-gradient(900px 500px at 80% -5%,rgba(52,214,160,.12),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(77,163,255,.14),transparent 60%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;line-height:1.5}
+.wrap{max-width:1160px;margin:0 auto;padding:28px 20px 64px}
+.kick{font:600 12px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;text-transform:uppercase;color:#7fb4ff}
+h1{font-size:clamp(28px,4.6vw,48px);line-height:1.08;letter-spacing:-.025em;font-weight:800;margin:12px 0 10px}
+h1 em{font-style:normal;background:linear-gradient(90deg,#4da3ff,#34d6a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mute);font-size:clamp(15px,2vw,18px);max-width:760px}
+button{font:inherit;cursor:pointer;color:var(--text)}
+.btn{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:10px 16px;font-weight:600;font-size:14px;transition:.15s}
+.btn:hover{border-color:var(--acc)}
+.btn.primary{background:linear-gradient(90deg,#2b7be0,#1fa67f);border-color:transparent}
+.btn:focus-visible,.node:focus-visible,.seg button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:22px 0 16px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.seg button{background:transparent;border:0;padding:10px 18px;font-weight:700;font-size:14px;color:var(--mute)}
+.seg button[aria-pressed=true].t{background:var(--bad);color:#1a0505}
+.seg button[aria-pressed=true].a{background:var(--ok);color:#03170f}
+.sample{font:12px ui-monospace,Menlo,monospace;color:var(--mute);letter-spacing:.04em}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;align-items:stretch;margin-top:6px}
+@media(max-width:860px){.flow{grid-template-columns:1fr}}
+.nodewrap{position:relative;padding:0 10px}
+.node{width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:18px;padding:16px;display:block;height:100%;transition:border-color .25s,box-shadow .25s,background .25s;position:relative}
+.node .top{display:flex;align-items:center;gap:12px}
+.ic{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,#0b1220);border:1.5px solid color-mix(in srgb,var(--c) 70%,#0b1220);flex:none}
+.nm{font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.nm small{display:block;font:600 11px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:var(--mute);text-transform:uppercase;margin-top:2px}
+.badge{display:inline-block;font:700 11px ui-monospace,Menlo,monospace;letter-spacing:.08em;padding:4px 9px;border-radius:6px;margin-top:12px;text-transform:uppercase;background:#14203a;color:var(--mute)}
+.node[data-state=issue]{border-color:var(--bad);box-shadow:0 0 0 3px rgba(255,107,107,.12)}
+.node[data-state=issue] .badge{background:var(--bad);color:#1a0505}
+.node[data-state=good]{border-color:var(--ok);box-shadow:0 0 0 3px rgba(52,214,160,.12)}
+.node[data-state=good] .badge{background:var(--ok);color:#03170f}
+.node[aria-pressed=true]{background:#101c33}
+.node[data-active=true]{transform:translateY(-3px)}
+.arrow{position:absolute;right:-12px;top:50%;width:24px;height:24px;margin-top:-12px;z-index:2;display:grid;place-items:center;background:var(--bg);border-radius:50%;border:1.5px solid var(--line);color:var(--mute);font-size:13px}
+@media(max-width:860px){.arrow{right:50%;top:auto;bottom:-14px;margin-right:-12px;transform:rotate(90deg)} .nodewrap{padding:0 0 18px}}
+.nodewrap:last-child .arrow{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1.5px solid var(--line);border-radius:20px;padding:22px}
+.panel h2{font-size:20px;letter-spacing:-.01em;margin-bottom:4px}
+.panel .sub{color:var(--mute);font-size:14px;margin-bottom:14px}
+.log{list-style:none;display:grid;gap:10px;min-height:120px}
+.log li{display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:start;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#0a1120;animation:in .35s ease both;font-size:14.5px}
+.log li.bad{border-color:var(--bad)}.log li.ok{border-color:var(--ok)}
+.day{font:700 12px ui-monospace,Menlo,monospace;letter-spacing:.08em;padding:4px 8px;border-radius:6px;background:#14203a;text-align:center}
+.bad .day{background:var(--bad);color:#1a0505}.ok .day{background:var(--ok);color:#03170f}
+.empty{color:var(--mute);font-size:14px;padding:6px 2px}
+.sum{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.chip{font:700 12px ui-monospace,Menlo,monospace;letter-spacing:.06em;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);color:var(--mute)}
+.chip.bad{border-color:var(--bad);color:#ff9a9a}.chip.ok{border-color:var(--ok);color:#7ee8c3}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.cols{grid-template-columns:1fr}}
+.col h3{font:700 11px ui-monospace,Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.col.t h3{color:var(--bad)}.col.a h3{color:var(--ok)}
+.col ul{list-style:none;display:grid;gap:8px;font-size:14.5px}
+.col li{padding-left:14px;position:relative}.col li::before{content:'';position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:2px;background:currentColor;opacity:.6}
+.kv{margin-top:14px;display:grid;gap:8px;font-size:13.5px;color:var(--mute)}
+.kv b{color:var(--text)}
+.human{margin-top:12px;border:1.5px solid var(--ok);background:rgba(52,214,160,.08);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center}
+.calc label{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:14px;margin:12px 0 2px}
+.calc label b{color:var(--text);font-variant-numeric:tabular-nums}
+.calc input[type=range]{width:100%;accent-color:#34d6a0}
+.results{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+@media(max-width:560px){.results{grid-template-columns:1fr}}
+.res{border:1.5px solid var(--ok);background:rgba(52,214,160,.07);border-radius:14px;padding:12px}
+.res b{display:block;font-size:24px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.res span{font-size:12px;color:var(--mute)}
+.note{font-size:12.5px;color:var(--mute);margin-top:12px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+@media(max-width:860px){.rules{grid-template-columns:1fr}}
+.rule{border:1.5px solid var(--line);border-radius:16px;padding:16px;background:rgba(14,22,40,.6)}
+.rule b{display:block;margin-bottom:4px}
+.rule span{color:var(--mute);font-size:14px}
+.cta{margin-top:26px;padding:22px;border:1.5px solid var(--line);border-radius:20px;background:linear-gradient(135deg,rgba(77,163,255,.1),rgba(52,214,160,.1))}
+.cta h3{font-size:22px;letter-spacing:-.01em;margin-bottom:6px}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">Manufacturing · Order to cash</div>
+  <h1>One order, four hand-offs: <em>where AI improves the ERP</em></h1>
+  <p class="lead">How an order moves from sales to operations, records, and finance and billing in most manufacturers, and where AI fits without replacing the ERP you already run. Press the button to send a sample order through.</p>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="View"><button class="t" id="mt" aria-pressed="true">How it works today</button><button class="a" id="ma" aria-pressed="false">With AI + approvals</button></div>
+    <button class="btn primary" id="run">Send the order through</button>
+    <button class="btn" id="reset">Reset</button>
+    <span class="sample">Sample: SO-10482 · 400 custom brackets · Acme Distribution (fictional)</span>
+  </div>
+
+  <div class="flow" id="flow"></div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2 id="logt">What happens to the order</h2>
+      <div class="sub" id="logs">Press “Send the order through” to follow it day by day.</div>
+      <ul class="log" id="log" aria-live="polite"></ul>
+      <div class="sum" id="sum"></div>
+    </div>
+    <div class="panel" id="detail"></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel calc">
+      <h2>What could one hand-off be worth?</h2>
+      <div class="sub">Adjust the assumptions to your own operation. This is a planning aid, not a promise.</div>
+      <label for="c1">Orders per month <b id="v1"></b></label><input id="c1" type="range" min="50" max="2000" step="10" value="400">
+      <label for="c2">Manual touchpoints per order <b id="v2"></b></label><input id="c2" type="range" min="3" max="20" step="1" value="11">
+      <label for="c3">Minutes per touchpoint <b id="v3"></b></label><input id="c3" type="range" min="2" max="30" step="1" value="9">
+      <label for="c4">Share of touchpoints removed by AI <b id="v4"></b></label><input id="c4" type="range" min="10" max="80" step="5" value="55">
+      <label for="c5">Loaded cost per hour (AUD) <b id="v5"></b></label><input id="c5" type="range" min="30" max="150" step="5" value="65">
+      <div class="results"><div class="res"><b id="r1"></b><span>hours saved per month</span></div><div class="res"><b id="r2"></b><span>value per month (AUD)</span></div><div class="res"><b id="r3"></b><span>full-time equivalents</span></div></div>
+      <div class="note">Hours = orders × touchpoints × minutes ÷ 60 × share removed. FTE assumes 152 productive hours a month. All inputs are assumptions you should replace with measured data.</div>
+    </div>
+    <div class="panel">
+      <h2>Where humans stay in control</h2>
+      <div class="sub">Three rules that make this safe to roll out in a regulated or risk-averse business.</div>
+      <div class="rules" style="grid-template-columns:1fr;margin-top:0">
+        <div class="rule"><b>AI drafts and flags. People approve.</b><span>Orders, purchases, master data merges and invoices outside tolerance always wait for an owner.</span></div>
+        <div class="rule"><b>Every change is logged.</b><span>Who, what, when, and which data the AI used, so audits and disputes are quick to resolve.</span></div>
+        <div class="rule"><b>Authority limits still apply.</b><span>Spend above set limits and ledger posting route to the people who hold that authority today.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta"><h3>Where does your order-to-cash flow leak?</h3><p style="color:var(--mute);font-size:15px">Start with the one hand-off that causes the most rework. Measure touchpoints per order, days from order to invoice and disputed invoices before and after.</p></div>
+</div>
+<script>
+// Shared content + icons for the ERP order-to-cash series (original artwork, illustrative numbers)
+const STAGES = [
+  { id: 'sales', n: 1, name: 'Sales', sub: 'Order intake', c: '#4da3ff', icon: 'doc',
+    todayShort: 'The customer PO arrives as a PDF and is re-keyed by hand.',
+    friction: 'Re-keyed from PDF, so errors travel downstream',
+    today: ['Customer PO arrives as an emailed PDF', 'A rep re-keys it into the ERP', 'Price, terms and delivery date are checked by hand or from memory'],
+    pain: 'One wrong spec revision or price here shows up three stages later.',
+    aiShort: 'AI reads the PO, checks it against price, terms and spec, and proposes a delivery date.',
+    ai: ['Reads the PO from email or PDF and drafts the order', 'Checks price, terms, credit and spec revision against master data', 'Checks stock and capacity, then proposes a delivery date'],
+    human: 'Sales confirms the exceptions AI flags',
+    data: 'Price lists, customer terms, credit status, item master',
+    guard: 'Drafts only. Nothing is confirmed without approval.' },
+  { id: 'ops', n: 2, name: 'Operations', sub: 'Plan, make, ship', c: '#f6bf3b', icon: 'gear',
+    todayShort: 'Planning runs on yesterday\'s data, so shortages show up late.',
+    friction: 'Records updated after the fact',
+    today: ['The planner works from yesterday\'s stock and schedule', 'Shortages are found when production is about to start', 'Sales hears about a delay from the customer'],
+    pain: 'Late surprises cost expediting fees and customer trust.',
+    aiShort: 'AI predicts shortages, drafts purchase requests and warns sales early.',
+    ai: ['Predicts material shortages and schedule clashes early', 'Drafts purchase requests and suggests substitutes or reschedules', 'Warns sales and the customer before a date slips'],
+    human: 'Planner approves purchases and reschedules',
+    data: 'Stock, open purchase orders, work orders, supplier lead times, machine status',
+    guard: 'Spend above set limits always routes to an approver.' },
+  { id: 'records', n: 3, name: 'Records', sub: 'Inventory and documents', c: '#9b8cff', icon: 'db',
+    todayShort: 'Batch, quality and delivery documents live in different places.',
+    friction: 'Documents do not match',
+    today: ['Stock and shipments are updated after the fact', 'Batch numbers, quality certificates and delivery documents sit in different places', 'Master data drifts: duplicate customers, retired item codes'],
+    pain: 'Nothing quite matches, so audits and disputes are slow.',
+    aiShort: 'AI posts movements as they happen and attaches batch and quality documents to the order.',
+    ai: ['Posts goods movements from scans and machine data as they happen', 'Attaches batch, quality and delivery documents to the right order', 'Flags missing documents and duplicate master data'],
+    human: 'Data owner approves master data merges',
+    data: 'Scans, machine events, quality results, document store',
+    guard: 'Every change is logged: who, what and when.' },
+  { id: 'finance', n: 4, name: 'Finance & Billing', sub: 'Invoice and collect', c: '#34d6a0', icon: 'coin',
+    todayShort: 'Invoices follow the order, not what actually shipped.',
+    friction: 'Invoice disputed, cash arrives late',
+    today: ['The invoice is raised from the order, not from what shipped', 'The customer disputes quantity or price', 'Collections are chased from a spreadsheet'],
+    pain: 'Disputes delay invoices and push cash out by weeks.',
+    aiShort: 'AI drafts the invoice from what shipped and flags mismatches before it is sent.',
+    ai: ['Drafts the invoice from what actually shipped', 'Matches order, delivery and invoice, and flags differences before sending', 'Predicts late payers and drafts reminders'],
+    human: 'Finance approves exceptions and credit notes',
+    data: 'Orders, delivery records, contracts, payment history',
+    guard: 'Posting to the ledger stays with finance.' },
+];
+// Illustrative figures only. Always label them as assumptions, not benchmarks.
+const METRICS = [
+  { k: 'Manual touchpoints per order', a: 11, b: 4, unit: '', fmt: v => v },
+  { k: 'Order to invoice (days)', a: 14, b: 6, unit: ' days', fmt: v => v },
+  { k: 'Invoices disputed', a: 12, b: 3, unit: '%', fmt: v => v + '%' },
+];
+
+function iconSVG(name, color = '#fff', size = 44, sw = 2.4) {
+  const p = {
+    doc: `<path d="M12 5h17l8 8v30H12z" /><path d="M29 5v8h8"/><path d="M17 22h15M17 29h15M17 36h9"/>`,
+    gear: `<circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="14"/>` + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="24" y1="6" x2="24" y2="10" transform="rotate(${a} 24 24)"/>`).join(''),
+    db: `<ellipse cx="24" cy="12" rx="14" ry="5.5"/><path d="M10 12v24c0 3 6.3 5.5 14 5.5S38 39 38 36V12"/><path d="M10 24c0 3 6.3 5.5 14 5.5S38 27 38 24"/>`,
+    coin: `<circle cx="24" cy="24" r="17"/><path d="M24 12v24M30 18.5c-1.2-2-3.6-3-6-3-3.3 0-6 1.6-6 4.2 0 6.3 12.5 2.7 12.5 9 0 2.7-2.9 4.3-6.5 4.3-2.7 0-5.2-1.1-6.5-3.2" />`,
+    check: `<path d="M10 25l9 9 19-20"/>`,
+    person: `<circle cx="24" cy="15" r="7"/><path d="M9 41c1-9 7-13 15-13s14 4 15 13"/>`,
+    spark: `<path d="M24 5l4.2 12.8L41 22l-12.8 4.2L24 39l-4.2-12.8L7 22l12.8-4.2z"/>`,
+    arrow: `<path d="M24 8v30M12 27l12 12 12-12"/>`,
+  }[name];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
+const $=s=>document.querySelector(s);
+const EVENTS={
+ today:[
+  {day:0,stage:0,t:'The PO arrives by email as a PDF.'},
+  {day:1,stage:0,t:'Re-keyed into the ERP. The spec revision is typed as B, not C.',k:'bad'},
+  {day:3,stage:1,t:'A material shortage is found when production is about to start.',k:'bad'},
+  {day:8,stage:2,t:'The quality certificate turns up on a shared drive. The delivery note says 380, the order says 400.',k:'bad'},
+  {day:12,stage:3,t:'The invoice is raised for 400. Only 380 shipped.',k:'bad'},
+  {day:14,stage:3,t:'The customer disputes it. The invoice is reissued and cash is delayed.',k:'bad'}],
+ ai:[
+  {day:0,stage:0,t:'AI reads the PO, catches spec revision C and proposes a delivery date. Sales confirms one flagged exception.',k:'ok'},
+  {day:0,stage:1,t:'AI predicts a steel bar shortage and drafts the purchase request. The planner approves it.',k:'ok'},
+  {day:3,stage:2,t:'Goods movements post on scan. The quality certificate attaches to the order automatically.',k:'ok'},
+  {day:4,stage:2,t:'Delivery matched: 380 shipped, 20 on a follow-up delivery.',k:'ok'},
+  {day:6,stage:3,t:'AI drafts the invoice for 380 and finds no mismatch. Finance approves and sends it.',k:'ok'}]
+};
+let mode='today', sel=0, shown=0, timer=null;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function nodeState(i){
+  const ev=EVENTS[mode].slice(0,shown).filter(e=>e.stage===i);
+  if(!ev.length) return 'idle';
+  return ev[ev.length-1].k==='bad'?'issue':'good';
+}
+function badge(i){const s=nodeState(i); return s==='issue'?'Problem found':s==='good'?'Handled':'Waiting';}
+function drawFlow(){
+  $('#flow').innerHTML=STAGES.map((s,i)=>{
+    const cur=shown>0&&EVENTS[mode][shown-1].stage===i;
+    return `<div class="nodewrap"><button class="node" style="--c:${s.c}" data-i="${i}" data-state="${nodeState(i)}" data-active="${cur}" aria-pressed="${sel===i}"><div class="top"><div class="ic">${iconSVG(s.icon,s.c,26)}</div><div class="nm">${s.n}. ${s.name}<small>${s.sub}</small></div></div><span class="badge">${badge(i)}</span></button><div class="arrow" aria-hidden="true">→</div></div>`}).join('');
+  document.querySelectorAll('.node').forEach(b=>b.onclick=()=>{sel=+b.dataset.i;drawFlow();drawDetail();});
+}
+function drawLog(){
+  const ev=EVENTS[mode].slice(0,shown);
+  $('#logt').textContent=mode==='today'?'What happens to the order today':'What happens with AI and approvals';
+  $('#log').innerHTML=ev.length?ev.map(e=>`<li class="${e.k}"><span class="day">Day ${e.day}</span><span>${e.t}</span></li>`).join(''):'<li class="empty" style="display:block;border:0;background:none">No events yet.</li>';
+  const done=shown>=EVENTS[mode].length;
+  $('#sum').innerHTML=done?(mode==='today'?'<span class="chip bad">14 days order to invoice</span><span class="chip bad">11 manual touchpoints</span><span class="chip bad">Invoice disputed</span>':'<span class="chip ok">6 days order to invoice</span><span class="chip ok">4 manual touchpoints</span><span class="chip ok">No dispute</span>')+'<span class="chip">Illustrative sample, not a benchmark</span>':'';
+}
+function drawDetail(){
+  const s=STAGES[sel];
+  $('#detail').innerHTML=`<h2 style="display:flex;align-items:center;gap:10px"><span class="ic" style="--c:${s.c};width:38px;height:38px">${iconSVG(s.icon,s.c,22)}</span>${s.n}. ${s.name}</h2><div class="sub">${s.sub}. Select a stage above to compare.</div>
+  <div class="cols"><div class="col t"><h3>Today</h3><ul>${s.today.map(x=>`<li>${x}</li>`).join('')}</ul></div><div class="col a"><h3>With AI</h3><ul>${s.ai.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+  <div class="human">${iconSVG('person','#34d6a0',22,3)}<span><b>Human approves:</b> ${s.human}</span></div>
+  <div class="kv"><div><b>Data it uses:</b> ${s.data}</div><div><b>Guardrail:</b> ${s.guard}</div></div>`;
+}
+function stop(){clearInterval(timer);timer=null;}
+function setMode(m){stop();mode=m;shown=0;$('#mt').setAttribute('aria-pressed',m==='today');$('#ma').setAttribute('aria-pressed',m==='ai');drawAll();}
+function drawAll(){drawFlow();drawLog();drawDetail();}
+$('#mt').onclick=()=>setMode('today');$('#ma').onclick=()=>setMode('ai');
+$('#reset').onclick=()=>{stop();shown=0;sel=0;drawAll();};
+$('#run').onclick=()=>{stop();shown=0;drawAll();const n=EVENTS[mode].length;
+  if(reduce){shown=n;sel=EVENTS[mode][n-1].stage;drawAll();return;}
+  timer=setInterval(()=>{if(shown>=n){stop();return;}shown++;sel=EVENTS[mode][shown-1].stage;drawAll();},1100);};
+// calculator
+const fm=n=>n.toLocaleString('en-AU');
+function calc(){
+  const o=+$('#c1').value,t=+$('#c2').value,m=+$('#c3').value,p=+$('#c4').value/100,r=+$('#c5').value;
+  const h=o*t*m/60*p;
+  $('#v1').textContent=fm(o);$('#v2').textContent=t;$('#v3').textContent=m+' min';$('#v4').textContent=Math.round(p*100)+'%';$('#v5').textContent='$'+r;
+  $('#r1').textContent=fm(Math.round(h));$('#r2').textContent=h*r>=1?('$'+fm(Math.round(h*r))):'$0';$('#r3').textContent=(h/152).toFixed(1);
+}
+['c1','c2','c3','c4','c5'].forEach(id=>$('#'+id).oninput=calc);
+drawAll();calc();
+</script>
+</body>
+</html>
